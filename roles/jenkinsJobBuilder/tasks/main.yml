@@ -1,0 +1,7 @@
+ - import_tasks: buildjob.yml
+ - meta: flush_handlers
+ - import_tasks: runbuild.yml
+ - name: Pausing for the builds to complete
+   pause:
+     minutes: 4
+  

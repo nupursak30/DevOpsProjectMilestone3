@@ -1,0 +1,28 @@
+---
+- name: Turning off Jenkins setup wizard
+  become: yes
+  lineinfile:
+    dest: /etc/default/jenkins
+    regexp: 'JAVA_ARGS="-Djava.awt.headless=true"'
+    line: 'JAVA_ARGS="-Djava.awt.headless=true -Djenkins.install.runSetupWizard=false"'
+  register: jenkins_default
+
+- name: Enable Firewall
+  ufw:
+    state: enabled
+    policy: allow
+  become: yes
+
+- name: Open port 8080
+  ufw:
+    rule: allow
+    port: 8080
+  become: yes
+
+- import_tasks: JenkinsRestart_wait.yml
+
+- name: Install Jenkins-Job-Builder
+  pip:
+   name: jenkins-job-builder
+   executable: /usr/bin/pip
+  become: yes

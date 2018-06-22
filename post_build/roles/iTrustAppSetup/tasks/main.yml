@@ -1,0 +1,3 @@
+---
+- import_tasks: iTrustsshSetup.yml
+- import_tasks: AppDeploy.yml

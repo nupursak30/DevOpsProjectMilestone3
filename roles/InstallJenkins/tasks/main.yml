@@ -1,0 +1,3 @@
+---
+- import_tasks: JenkinsDependencies.yml
+- import_tasks: jenkinsInstall.yml

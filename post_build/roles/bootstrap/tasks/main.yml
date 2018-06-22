@@ -1,0 +1,7 @@
+---
+#https://groups.google.com/forum/#!topic/ansible-project/DUKzTho3OCI
+#Solving the bootstrap issue of Python on Ubuntu 16.04 AWS EC2 instance
+  - name: apt-get update
+    raw: apt-get update -qq
+  - name: Installing python 2.7 on Amazon EC2
+    raw: apt-get install -qq python2.7

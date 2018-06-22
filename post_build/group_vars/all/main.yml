@@ -1,0 +1,5 @@
+---
+home_dir: "/home/ubuntu"
+mysql_pass: "{{ lookup('ini', 'mysql_password section=mysql file=./credentials.ini') }}"
+mongo_user: "{{ lookup('ini', 'mongo_user section=mongodb file=./credentials.ini') }}"
+mongo_password: "{{ lookup('ini', 'mongo_password section=mongodb file=./credentials.ini') }}"

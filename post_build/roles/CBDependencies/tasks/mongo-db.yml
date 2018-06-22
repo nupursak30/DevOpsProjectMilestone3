@@ -1,0 +1,49 @@
+---
+- name: MongoDB | Import the public key used by the package management system
+  become: yes
+  apt_key: keyserver=keyserver.ubuntu.com id=7F0CEB10
+
+- name: MongoDB | Create a list file
+  become: yes
+  lineinfile: dest=/etc/apt/sources.list.d/mongodb-org-3.0.list line="deb http://repo.mongodb.org/apt/ubuntu precise/mongodb-org/3.0 multiverse" state=present create=yes
+
+- name: MongoDB | Install the packages
+  become: yes
+  apt: name={{ item }}=3.0.7 state=present update_cache=yes
+  with_items:
+    - mongodb-org
+    - mongodb-org-server
+    - mongodb-org-shell
+    - mongodb-org-mongos
+    - mongodb-org-tools
+
+- name: Install pyMongo
+  become: yes
+  pip:
+    name: pyMongo
+    state: present
+
+- mongodb_user:
+    database: admin
+    name: "{{ mongo_user }}"
+    password: "{{ mongo_password }}"
+    roles: dbAdmin,readWrite
+    state: present
+
+- name: Changing Environment variable Mongo_port
+  become: yes
+  lineinfile: dest=/etc/environment line='MONGO_PORT=3002' insertafter='EOF' state=present
+
+- name: Changing Environment variable Mongo_IP
+  become: yes
+  lineinfile: dest=/etc/environment line='MONGO_IP=127.0.0.1' insertafter='EOF' state=present
+
+- name: Changing Environment variable Mongo_user
+  become: yes
+  lineinfile: dest=/etc/environment line='MONGO_USER="{{mongo_user}}"' insertafter='EOF' state=present
+
+- name: Changing Environment variable Mongo_pass
+  become: yes
+  lineinfile: dest=/etc/environment line='MONGO_PASSWORD="{{mongo_password}}"' insertafter='EOF' state=present
+
+

@@ -1,0 +1,8 @@
+---
+- name: Clone checkbox.io Github repository
+  become: yes
+  git: >
+    repo=https://github.com/cmachan/checkbox.io.git
+    dest=checkbox.io
+    update=no
+    force=yes

@@ -1,0 +1,30 @@
+---
+- hosts: jenkins
+  gather_facts: no
+  roles:
+    - dependencies
+    - post-ec2-instance-checkBox
+
+
+- name: Configure checkBox EC2 instance
+  hosts: checkbox
+  become: yes
+  gather_facts: no
+  roles:
+    - bootstrap
+    - CBDependencies
+
+- name: Configure Redis Server
+  hosts: checkbox[0]
+  become: yes
+  gather_facts: no
+  roles:
+    - redisServer
+
+- name: Configure checkbox
+  hosts: checkbox
+  become: yes
+  gather_facts: no
+  roles:
+    - CBSetup
+
