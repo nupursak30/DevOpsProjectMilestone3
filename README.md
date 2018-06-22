@@ -1,1 +1,4 @@
-# DevOpsProjectMilestone3
+# DevOpsProjectMilestone3 
+## Deployment and Rolling updates
+Rolling update is basically an extension to normal deployment that we did in this milestone. We used mysql database on the same ec2 instance as on the jenkins-server. We need sql server in jenkins and sql client in all the instances of iTrust and ports at server should be open and accessible to all the instances. For this purpose we have added 3306 in inbound and All in outbound while creating security group in aws. Also the bind-address is made 0.0.0.0 in mycnf.d . For rolling updates we have used ansible module as script which is a recommended module for rolling updates and it will deploy the itrust just one at a time. In iTrust instances, after cloning the iTrust repository and making the mysql changes as above, we also changed hibernate properties and db properties.
+For monitoring part, we have used socket.io. The socket is listening on port 3000 and 8888. All the iTrust instances ips are fetched using replacec module. Also to detect the changes on dashboard we are stopping the jetty process one by one.

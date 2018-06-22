@@ -1,0 +1,113 @@
+---
+- name: Remove previous iTrust repo it it exists
+  become: yes
+  file:
+    state: absent
+    path: /home/ubuntu/App/
+
+- name: Clone the iTrust repo
+  become: yes
+  git: >
+      repo=git@github.ncsu.edu:nsakhal/iTrust2-v2.git
+      key_file=.ssh/id_rsa
+      dest=App
+      accept_hostkey=yes
+      update=no
+      force=yes
+
+- name: Checkout to production branch
+  become: yes
+  shell: git checkout production
+  args:
+    chdir: /home/ubuntu/App
+
+- name: checking the git branch
+  shell: git branch
+  args:
+    chdir: /home/ubuntu/App
+  register: gitBranch
+
+- debug:
+    msg: "{{ gitBranch.stdout }}"
+
+- name: Rename template files
+  copy:
+    src: "{{home_dir}}/App/iTrust2/src/main/java/db.properties.template"
+    dest: "{{home_dir}}/App/iTrust2/src/main/java/db.properties"
+    remote_src: yes
+
+- copy:
+    src: "{{home_dir}}/App/iTrust2/src/main/java/email.properties.template"
+    dest: "{{home_dir}}/App/iTrust2/src/main/java/email.properties"
+    remote_src: yes
+
+- copy:
+    src: "{{home_dir}}/App/iTrust2/src/main/resources/hibernate.properties.template"
+    dest: "{{home_dir}}/App/iTrust2/src/main/resources/hibernate.properties"
+    remote_src: yes
+
+- name: Edit the db.properties file
+  lineinfile:
+    path: "{{home_dir}}/App/iTrust2/src/main/java/db.properties"
+    state: present
+    regexp: 'password'
+    line: 'password {{ mysql_pass }}'
+    backrefs: yes
+
+- name: replace username in db
+  lineinfile:
+    path: "{{home_dir}}/App/iTrust2/src/main/java/db.properties"
+    state: present
+    regexp: 'username'
+    line: 'username itrustUser'
+    backrefs: yes
+
+- name: replace mysql IP in db
+  lineinfile:
+    path: "{{home_dir}}/App/iTrust2/src/main/java/db.properties"
+    state: present
+    regexp: 'url'
+    line: 'url jdbc:mysql://{{ mysql_ip }}:3306/iTrust2?createDatabaseIfNotExist=true'
+    backrefs: yes
+
+- name: Edit the hibernate.properties file
+  lineinfile:
+    path: "{{home_dir}}/App/iTrust2/src/main/resources/hibernate.properties"
+    state: present
+    regexp: 'password'
+    line: 'hibernate.connection.password = {{ mysql_pass }}'
+    backrefs: yes
+
+- name: replace username in hibernate
+  lineinfile:
+    path: "{{home_dir}}/App/iTrust2/src/main/resources/hibernate.properties"
+    state: present
+    regexp: 'username'
+    line: 'hibernate.connection.username =  itrustUser'
+    backrefs: yes
+
+- name: replace url in hibernate
+  lineinfile:
+    path: "{{home_dir}}/App/iTrust2/src/main/resources/hibernate.properties"
+    state: present
+    regexp: 'url'
+    line: 'hibernate.connection.url = jdbc:mysql://{{ mysql_ip }}:3306/iTrust2?createDatabaseIfNotExist=true'
+    backrefs: yes
+
+- name: Run the maven test
+  shell: sudo cp -rf -p pom.xml_NOPLUGIN pom.xml && mvn process-test-classes
+  args:
+    chdir: "{{home_dir}}/App/iTrust2"
+  register: mvn_result
+  become: yes
+
+- name: Start the iTrust App
+  become: yes
+  shell: nohup mvn jetty:run &
+  args:
+    chdir: "{{home_dir}}/App/iTrust2"
+  when: mvn_result|success
+
+#Paused Playbook's execution as the server takes some time to start
+- pause:
+    minutes: 3

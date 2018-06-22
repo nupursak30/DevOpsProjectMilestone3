@@ -1,0 +1,44 @@
+---
+- name: Get checkbox repo from Github
+  git:
+    repo: "https://github.com/nupur30/checkbox.io.git"
+    dest: "{{ home_dir }}/test"
+    version: production
+    clone: yes
+    force: yes
+    update: yes
+
+- name: checking the git branch
+  shell: git branch
+  args:
+    chdir: /home/ubuntu/test
+  register: checkboxBranch
+
+- debug:
+    msg: "{{ checkboxBranch.stdout }}"
+
+- name: Copy default file
+  become: yes
+  copy:
+      src: "{{ home_dir }}/test/local-conf/default"
+      dest: /etc/nginx/sites-available/default
+      remote_src: yes
+
+- name: Copy nginx configuration file
+  become: yes
+  copy:
+    src: "{{ home_dir }}/test/local-conf/nginx.conf"
+    dest: /etc/nginx/nginx.conf
+    remote_src: yes
+
+- name: Edit the default file
+  become: yes
+  lineinfile:
+    path: /etc/nginx/sites-available/default
+    state: present
+    regexp: 'root /Users/gameweld/bitbucket/checkbox.io/checkbox.io/public_html/'
+    line: '  root {{ home_dir }}/test/public_html/;'
+    backrefs: yes
+
+- name: Install forever module (to run our Node.js app).
+  npm: name=forever global=yes state=present

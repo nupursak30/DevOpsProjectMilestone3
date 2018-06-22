@@ -1,0 +1,23 @@
+- job:
+    name: iTrustBuildJob
+    project-type: freestyle
+    display-name: iTrustBuildJob
+    concurrent: true
+    workspace: /home/ubuntu/iTrust2-v2/iTrust2
+    retry-count: 3
+    builders:
+      - shell: |
+           sudo cp -rf -p pom.xml_WITHPLUGIN pom.xml
+           sudo mvn process-test-classes
+           sudo cp -rf -p pom.xml_NOPLUGIN pom.xml
+           sudo mvn clean test verify checkstyle:checkstyle
+    publishers:
+      - post-tasks:
+        - matches:
+          - log-text: .
+            operator: AND
+          escalate-status: false
+          run-if-job-successful: false
+          script: |
+            sudo ansible-playbook -i /home/ubuntu/post_build/itrust_inventory /home/ubuntu/post_build/itrust_main.yml
+    become: yes

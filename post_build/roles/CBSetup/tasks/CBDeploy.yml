@@ -1,0 +1,23 @@
+---
+- name: Build Checkbox.io
+  npm:
+    path: "{{ home_dir }}/test/server-side/site/"
+
+- name: Restart nginx
+  become: yes
+  service:
+    name: nginx
+    state: restarted
+
+- name: pause for 3 min
+  pause:
+    minutes: 3
+
+
+
+- name: Run Checkbox.io
+  shell: "forever start server.js"
+  args:
+    chdir: "{{ home_dir }}/test/server-side/site/"
+  become: yes
+  become_user: ubuntu

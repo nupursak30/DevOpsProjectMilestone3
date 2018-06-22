@@ -1,0 +1,10 @@
+---
+- name: Configure iTrust EC2 instance
+  hosts: iTrust
+  become: yes
+  serial: 1
+  gather_facts: no
+  roles:
+    - stopiTrust
+    - iTrustDependencies
+    - iTrustAppSetup

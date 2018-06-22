@@ -1,0 +1,13 @@
+---
+- name: Install Git plugin
+  jenkins_plugin:
+    name: "{{ item }}"
+    with_dependencies: yes
+    url: http://localhost:8008
+  with_items:
+    - Git
+    - postbuild-task
+    - postbuildscript
+  register: plugin_install
+
+- import_tasks: JenkinsRestart_wait.yml

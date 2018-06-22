@@ -1,0 +1,11 @@
+# templates/ssh_config.j2
+
+{{ ansible_managed | comment }}
+
+Host https://<unity-id>@github.ncsu.edu
+    HostName <unity-id>
+    IdentityFile .ssh/id_rsa
+    ForwardAgent yes
+    IdentitiesOnly yes
+Host *
+    StrictHostKeyChecking no

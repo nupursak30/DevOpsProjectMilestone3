@@ -1,0 +1,17 @@
+  - name: Run checkbox build job.
+    become: yes
+    uri:
+      url: http://localhost:8008/job/{{jenkincheckboxjobname}}/build
+      method: GET
+      # force_basic_auth: yes
+      status_code: 201
+
+  - name: Run iTrust build job.
+    become: yes
+    uri:
+      url: http://localhost:8008/job/{{jenkinitrustjobname}}/build
+      method: GET
+      # user: admin
+      # password: admin
+      # force_basic_auth: yes
+      status_code: 201

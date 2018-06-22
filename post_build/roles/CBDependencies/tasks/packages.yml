@@ -1,0 +1,13 @@
+---
+- name: Adding nodejs PPA
+  shell: curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
+  become: yes
+
+- name: Install git, npm, nodejs, nginx and python-pip packages
+  apt: pkg={{ item }} state=present update_cache=yes cache_valid_time=1800
+  become: yes
+  with_items:
+  - nodejs
+  - nginx
+  - git
+  - python-pip

@@ -1,0 +1,68 @@
+---
+- name: Set MySQL root password before installing
+  debconf: name='mysql-server' question='mysql-server/root_password' value='{{mysqlpass | quote}}' vtype='password'
+  become: yes
+
+- name: Confirm MySQL root password before installing
+  debconf: name='mysql-server' question='mysql-server/root_password_again' value='{{mysqlpass | quote}}' vtype='password'
+  become: yes
+
+- name: Add mysql repo
+  get_url:
+    url: https://dev.mysql.com/get/mysql-apt-config_0.8.9-1_all.deb
+    dest: "/home/ubuntu"
+    mode: 0440
+  become: true
+
+- name: Install mysql repo
+  apt: "deb=/home/ubuntu/mysql-apt-config_0.8.9-1_all.deb"
+  become: true
+
+- name: Install python-mysqldb
+  apt:
+    name: python-mysqldb
+    state: present
+    update_cache: yes
+  become: true
+
+- name: Install mysql 5.7
+  apt:
+    name: mysql-server
+    state: present
+    update_cache: yes
+  become: true
+
+- name: Create new user to access all mysql databases
+  become: true
+  mysql_user:
+    name: itrustUser
+    host: "%"
+    password: "{{ mysql_pass }}"
+    login_user: root
+    login_password: "{{ mysqlpass }}"
+    check_implicit_admin: yes
+    priv: "*.*:ALL,GRANT"
+
+- name: Create mysql.conf.d directory
+  file: path=/etc/mysql/mysql.conf.d state=directory mode=0755
+  become: yes
+
+- name: Changing the binding address present in mysqld.cnf
+  become: yes
+  template:
+    src: mysqld.cnf.j2
+    dest: /etc/mysql/mysql.conf.d/mysqld.cnf
+    mode: 0644
+
+- name: Remove a .deb package
+  file:
+    path: "/home/ubuntu/mysql-apt-config_0.8.9-1_all.deb"
+    state: absent
+    mode: 0440
+
+- name: Start the MySQL service
+  become: true
+  service:
+    name: mysql
+    state: restarted
+    enabled: true

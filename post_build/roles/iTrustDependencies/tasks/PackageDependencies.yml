@@ -1,0 +1,20 @@
+---
+- name: Add repo for java 8
+  apt_repository: repo='ppa:webupd8team/java' state=present
+  become: yes
+
+- name: Set license selected
+  shell: /bin/echo debconf shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
+  become: yes
+
+- name: Set license seen
+  shell: /bin/echo debconf shared/accepted-oracle-license-v1-1 seen true | /usr/bin/debconf-set-selections
+  become: yes
+
+- name: Install maven,java and Git
+  apt: pkg={{ item }} state=present update_cache=yes cache_valid_time=1800
+  become: yes
+  with_items:
+  - maven
+  - oracle-java8-installer
+  - git

@@ -1,0 +1,9 @@
+---
+#https://stackoverflow.com/questions/46515704/how-to-kill-a-running-process-using-ansible
+- name: Get jetty processes ID
+  shell: "ps -ef | grep -v grep | grep -w jetty | awk '{print $2}'"
+  register: running_processes
+
+- name: Kill jetty processes
+  shell: "kill {{ item }}"
+  with_items: "{{ running_processes.stdout_lines }}"

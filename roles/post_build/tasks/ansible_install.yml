@@ -1,0 +1,23 @@
+---
+  - name: Adding ansible repository files
+    apt_repository: repo='ppa:ansible/ansible' state=present
+    become: yes
+
+  - name: Running apt-get update for ansible installation
+    apt:
+      update_cache: yes
+    become: yes
+
+  - name: Installing ansible
+    apt:
+      name: ansible
+      state: present
+      update_cache: yes
+    become: yes
+
+  - name: checking ansible-version
+    shell: ansible --version
+    register: voutput
+
+  - debug:
+      var: voutput.stdout

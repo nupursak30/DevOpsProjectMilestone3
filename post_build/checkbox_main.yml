@@ -1,0 +1,8 @@
+---
+- name: Configure checkBox EC2 instance
+  hosts: checkbox
+  become: yes
+  gather_facts: no
+  roles:
+    - CBDependencies
+    - CBSetup

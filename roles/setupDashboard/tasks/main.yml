@@ -1,0 +1,36 @@
+---
+- name: Adding nodejs PPA
+  shell: curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
+  become: yes
+
+- name: Install git, npm, nodejs, nginx and python-pip packages
+  apt: pkg={{ item }} state=present update_cache=yes cache_valid_time=1800
+  become: yes
+  with_items:
+  - nodejs
+
+- name: Install forever module (to run our main.js app).
+  npm: name=forever global=yes state=present
+  become: yes
+
+- name: Install http-server module.
+  npm: name=http-server global=yes state=present
+  become: yes
+
+- name: Build Monitoring Dashboard
+  npm:
+    path: "/home/ubuntu/post_build/Monitoring/"
+
+- name: Run dashboard
+  shell: forever start main.js
+  args:
+    chdir: "/home/ubuntu/post_build/Monitoring/"
+  become: yes
+  become_user: ubuntu
+
+- name: Run http-server
+  shell: forever start -c "http-server -p 8888" ./
+  args:
+    chdir: "/home/ubuntu/post_build/Monitoring/www/"
+  become: yes
+  become_user: ubuntu

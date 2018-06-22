@@ -1,0 +1,16 @@
+---
+- name: Installing python-pip
+  apt:
+    name: python-pip
+    state: latest
+    update_cache: yes
+  become: yes
+
+- name: Installing 'boto' and 'boto3' in order to use AWS EC2 Ansible module
+  pip:
+    name: "{{ item }}"
+    state: latest
+  become: yes
+  with_items:
+    - boto
+    - boto3
