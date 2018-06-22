@@ -1,0 +1,59 @@
+---
+  - name: Installing python-pip
+    apt:
+      name: python-pip
+      state: latest
+      update_cache: yes
+    become: yes
+
+  - name: Installing 'boto' and 'boto3' in order to use AWS EC2 Ansible module
+    pip:
+      name: "{{ item }}"
+      state: latest
+    become: yes
+    with_items:
+      - boto
+      - boto3
+
+  #The code snippet used for java8 installation is
+  #referred from the following website:
+  #https://coderwall.com/p/4ogyuw/ansible-install-java-8
+
+  - name: Adding repo for java 8 installation
+    apt_repository: repo='ppa:webupd8team/java' state=present
+    become: yes
+
+  - name: Setting the license as selected
+    shell: /bin/echo debconf shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
+    become: yes
+
+  - name: Setting the license as seen
+    shell: /bin/echo debconf shared/accepted-oracle-license-v1-1 seen true | /usr/bin/debconf-set-selections
+    become: yes
+
+  #https://tecadmin.net/install-latest-nodejs-npm-on-ubuntu/
+  #Adding nodejs PPA
+  - name: Installing python packages for nodejs and npm
+    apt:
+      name: python-software-properties
+      state: present
+      update_cache: yes
+      cache_valid_time: 1800
+    become: yes
+
+  - name: Adding nodejs PPA
+    shell: curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
+    become: yes
+
+  - name: Installing git,java8,npm,nodejs
+    apt:
+      name: "{{ item }}"
+      state: present
+      update_cache: yes
+      cache_valid_time: 1800
+    become: yes
+    with_items:
+      - git
+      - oracle-java8-installer
+      - nodejs
+      

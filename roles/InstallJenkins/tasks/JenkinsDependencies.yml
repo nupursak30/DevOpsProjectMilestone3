@@ -1,0 +1,39 @@
+---
+- name: Add repo for java 8
+  apt_repository: repo='ppa:webupd8team/java' state=present
+  become: yes
+
+- name: Set license selected
+  shell: /bin/echo debconf shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
+  become: yes
+
+- name: Set license seen
+  shell: /bin/echo debconf shared/accepted-oracle-license-v1-1 seen true | /usr/bin/debconf-set-selections
+  become: yes
+#https://tecadmin.net/install-latest-nodejs-npm-on-ubuntu/
+#Adding nodejs PPA
+- name: Installing python packages for nodejs and npm
+  apt:
+    name: python-software-properties
+    state: present
+    update_cache: yes
+    cache_valid_time: 1800
+  become: yes
+
+- name: Adding nodejs PPA
+  shell: curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
+  become: yes
+
+- name: Install dependencies required for Jenkins
+  apt: pkg={{ item }} state=present update_cache=yes cache_valid_time=1800
+  become: yes
+  with_items:
+  - oracle-java8-installer
+  - git
+  - nodejs
+  - python-dev
+  - maven
+
+- name: Install python-pip
+  apt: name=python-pip state=latest update_cache=yes
+  become: yes

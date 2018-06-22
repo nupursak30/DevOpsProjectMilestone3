@@ -1,0 +1,12 @@
+---
+- name: Creating post-receive hook for checkbox.io
+  template:
+    src: checkbox-pre-push.j2
+    dest: /home/ubuntu/checkbox.io/.git/hooks/pre-push
+    mode: a+x
+
+- name: Creating post-receive hook for iTrust
+  template:
+    src: itrust-pre-push.j2
+    dest: /home/ubuntu/iTrust2-v2/.git/hooks/pre-push
+    mode: a+x

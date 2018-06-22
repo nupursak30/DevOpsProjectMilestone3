@@ -1,0 +1,127 @@
+---
+  - name: Refresh inventory
+    template:
+      src: inventory.j2
+      dest: inventory
+      mode: 0644
+  #https://stackoverflow.com/questions/26422763/how-to-create-a-new-key-in-ansible-using-the-ec2-key-module
+
+  #Create a new EC2 keypair for us-east-2 region
+  - name: Create a new EC2 key pair for us-east-2 region
+    ec2_key:
+      name: aws-m1-key
+      region: "us-east-2"
+      aws_access_key: "{{ lookup('ini', 'aws_access_keyID section=aws file=./credentials.ini') }}"
+      aws_secret_key: "{{ lookup('ini', 'aws_secret_key section=aws file=./credentials.ini') }}"
+    register: ec2key
+
+  - name: save private key
+    copy:
+      content: "{{ ec2key.key.private_key }}"
+      dest: "./aws-m1-key.pem"
+      mode: 0600
+    when: ec2key.changed
+
+  # - name: read the private key
+  #   shell: cat ./aws-m1-key.pem
+  #   register: output
+
+  # - debug:
+  #     var: output.stdout
+
+
+  #Obtain the vpc-id for creating a new security group
+  - name: Obtaining the vpc-id for creating a new security group
+    ec2_vpc_net_facts:
+      region: us-east-2
+      aws_access_key: "{{ lookup('ini', 'aws_access_keyID section=aws file=./credentials.ini') }}"
+      aws_secret_key: "{{ lookup('ini', 'aws_secret_key section=aws file=./credentials.ini') }}"
+    register: vpc
+
+  # - debug:
+  #     var: vpc
+
+  - debug:
+      var: vpc.vpcs[0].id
+
+  #Creating a new security group for AWS EC2 instance
+  - name: Creating new security group for AWS EC2 instance
+    ec2_group:
+      name: devops_m1
+      state: present
+      description: security group for jenkins server
+      vpc_id: "{{ vpc.vpcs[0].id }}"
+      region: us-east-2
+      aws_access_key: "{{ lookup('ini', 'aws_access_keyID section=aws file=./credentials.ini') }}"
+      aws_secret_key: "{{ lookup('ini', 'aws_secret_key section=aws file=./credentials.ini') }}"
+      rules:
+        - proto: tcp
+          ports:
+            - 80
+            - 8080
+            - 22
+            - 443
+            - 8008
+            - 6379
+          cidr_ip: 0.0.0.0/0
+        - proto: icmp
+          from_port: -1
+          to_port:  -1
+          cidr_ip: 0.0.0.0/0
+      rules_egress:
+        - proto: all
+          cidr_ip: 0.0.0.0/0
+    register: secgroup
+
+  - debug:
+      var: secgroup
+
+  #http://docs.ansible.com/ansible/latest/ec2_module.html
+  #Creating a new EC2 instance in us-east-2 region
+  - name: Creating a new EC2 instance in us-east-2 region
+    ec2:
+      key_name: aws-m1-key
+      group: devops_m1
+      aws_access_key: "{{ lookup('ini', 'aws_access_keyID section=aws file=./credentials.ini') }}"
+      aws_secret_key: "{{ lookup('ini', 'aws_secret_key section=aws file=./credentials.ini') }}"
+      instance_type: t2.small
+      # image: ami-965e6bf3      #Ubuntu Server 16.04 LTS (HVM)
+      image: ami-f0f8d695       #Ubuntu Server 14.04
+      region: us-east-2
+      #state: present
+      wait: yes
+      wait_timeout: 500
+      count: 1
+      instance_tags:
+        Name: ec2_m1
+    register: ec2
+
+  # - name: Add new instance to host group
+  #   add_host:
+  #     hostname: "{{ item.public_ip }}"
+  #     groupname: launched
+  #   with_items: "{{ ec2.instances }}"
+
+  #https://www.agix.com.au/build-an-ec2-using-ansible-step-by-step/
+  - name: Adding the public IP address of EC2 instance in the inventory
+    lineinfile:
+      path: ./inventory
+      regexp: "{{ item.public_ip }}"
+      insertafter: "[jenkins-server]"
+      line: "{{ item.public_ip }} ansible_ssh_user=ubuntu ansible_ssh_private_key_file=./aws-m1-key.pem"
+    with_items: "{{ ec2.instances }}"
+
+
+  #Reload inventory to reflect the changes
+  - name: Reloading inventory to reflect the changes
+    meta: refresh_inventory
+
+
+  - name: Wait for SSH to come up
+    wait_for:
+      host: "{{ item.public_dns_name }}"
+      port: 22
+      delay: 60
+      timeout: 320
+      state: started
+    with_items: "{{ ec2.instances }}"

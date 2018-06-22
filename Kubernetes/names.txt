@@ -1,0 +1,2 @@
+S3_bucket_name= ayyana-example-com-state-store
+ClusterName= cbcluster.k8s.local

@@ -1,0 +1,18 @@
+---
+- name: Clone checkbox.io Github repository
+  git: >
+    repo=https://github.com/nupur30/checkbox.io.git
+    dest=checkbox.io
+    update=no
+    force=yes
+    version=production
+
+- name: clone iTrust repository
+  git: >
+      repo=git@github.ncsu.edu:nsakhal/iTrust2-v2.git
+      key_file=.ssh/id_rsa
+      dest=iTrust2-v2
+      accept_hostkey=yes
+      update=no
+      force=yes
+      version=production

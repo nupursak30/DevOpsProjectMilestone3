@@ -1,0 +1,21 @@
+---
+- name: Checking the status of the checkbox.io build
+  shell: cat /var/lib/jenkins/jobs/checkboxBuildJob/lastSuccessful/log | grep SUCCESS
+  register: checkboxlog
+  become: yes
+
+- debug:
+    var:  checkboxlog.stdout
+  when: checkboxlog.stdout != ""
+
+- name: Checking the status of the iTrust build
+  shell: cat /var/lib/jenkins/jobs/iTrustBuildJob/lastSuccessful/log | grep SUCCESS
+  register: iTrustlog
+  become: yes
+
+- debug:
+    var: iTrustlog.stdout
+  when: iTrustlog.stdout != ""
+
+- import_tasks: post_build.yml
+  when: checkboxlog.stdout != "" and iTrustlog.stdout != ""

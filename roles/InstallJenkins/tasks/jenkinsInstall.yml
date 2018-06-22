@@ -1,0 +1,18 @@
+---
+- name: Add Jenkins Repository Key
+  apt_key:
+    url: "https://pkg.jenkins.io/debian/jenkins-ci.org.key"
+    state: present
+    validate_certs: no
+  become: yes
+
+- name: Add Jenkins Source List
+  shell: echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list
+  become: yes
+
+- name: Install Jenkins
+  apt:
+    name: jenkins
+    state: present
+    update_cache: yes
+  become: yes

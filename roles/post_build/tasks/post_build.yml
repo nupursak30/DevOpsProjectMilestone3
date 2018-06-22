@@ -1,0 +1,35 @@
+---
+- name: Unzipping the files needed to run iTrust and Checkboxio through Jenkins
+  unarchive:
+    src: ./post_build.zip
+    dest: ./
+
+- name: copy Github private ssh key
+  copy:
+    src: ./roles/SetupJenkins/tasks/id_rsa
+    dest: ./post_build/roles/iTrustAppSetup/tasks/id_rsa
+
+- name: Copy Github credentials template
+  copy:
+    src: ./roles/SetupJenkins/templates/ssh_config.j2
+    dest: ./post_build/roles/iTrustAppSetup/templates/ssh_config.j2
+
+- name: Copy Github credentials template
+  copy:
+    src: ./credentials.ini
+    dest: ./post_build/credentials.ini
+
+- name: Copy ssh config
+  copy:
+    src: ./config
+    dest: ~/.ssh/config
+    mode: 0644
+  become: yes
+
+- name: Run the Ansible playbook to provision and configure checkbox and iTrust
+  shell: ansible-playbook -i inventory main.yml
+  args:
+   chdir: ./post_build
+  register: post_build_output
+- debug:
+    var: post_build_output.stdout

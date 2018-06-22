@@ -1,0 +1,20 @@
+---
+- hosts: ansible-server
+  gather_facts: no
+  roles:
+    - dependencies
+    - ec2-instance
+
+
+- name: Configure instance(s)
+  hosts: jenkins-server
+  gather_facts: no
+
+  roles:
+    - InstallJenkins
+    - SetupJenkins
+    - triggerDeploy
+    - jenkinsJobBuilder
+    - postJenkinsDependencies
+    - post-ec2-instance-checkBox
+    - post-ec2-instance-iTrust
