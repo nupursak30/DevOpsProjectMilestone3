@@ -1,0 +1,10 @@
+ - job:
+    name: checkboxBuildJob
+    project-type: freestyle
+    display-name: checkboxBuildJob
+    concurrent: true
+    workspace: /home/ubuntu/checkbox.io/server-side/site
+    retry-count: 3
+    builders:
+      - shell: sudo npm install
+    become: yes

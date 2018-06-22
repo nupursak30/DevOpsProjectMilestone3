@@ -1,0 +1,3 @@
+---
+- import_tasks: setupCB.yml
+- import_tasks: CBDeploy.yml

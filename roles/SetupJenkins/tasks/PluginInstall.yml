@@ -1,0 +1,8 @@
+---
+- name: Install Git plugin
+  jenkins_plugin:
+   name: Git
+   with_dependencies: yes
+  register: plugin_install
+
+- import_tasks: JenkinsRestart_wait.yml

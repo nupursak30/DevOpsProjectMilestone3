@@ -1,0 +1,8 @@
+  - name: Run checkbox build job.
+    become: yes
+    uri:
+      url: http://localhost:8080/job/{{jenkincheckboxjobname}}/build
+      method: GET
+      # force_basic_auth: yes
+      status_code: 201
+

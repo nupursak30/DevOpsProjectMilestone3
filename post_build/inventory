@@ -1,0 +1,4 @@
+[jenkins]
+localhost ansible_connection=local
+[loadBalancer]
+[checkbox]

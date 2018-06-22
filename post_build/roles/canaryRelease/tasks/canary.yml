@@ -1,0 +1,60 @@
+---
+
+- name: Adding nodejs PPA
+  shell: curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
+  become: yes
+
+- name: Install required packages
+  apt: pkg={{ item }} state=present update_cache=yes cache_valid_time=1800
+  become: yes
+  with_items: 
+    - nodejs
+
+- name: Create folder to place load balancer files
+  file:
+    path: load_balancer
+    state: directory
+
+- name: copy load_balancer files
+  copy:
+    src: templates/{{item}}
+    dest: load_balancer/
+  with_items:
+    - site.js
+    - package.json
+ 
+- name: replace slave1
+  replace:
+    dest: load_balancer/site.js
+    regexp: 'slave1'
+    replace: '{{ slave1 }}'
+
+- name: replace slave2
+  replace:
+    dest: load_balancer/site.js
+    regexp: 'slave2'
+    replace: '{{ slave2 }}'
+
+
+- name: run npm install for load balancer
+  shell: npm install
+  args:
+    chdir: load_balancer/
+
+- name: Install forever to run load_balancer proxy server
+  shell: npm install -g forever
+
+- name: stop previous verison of forever runs
+  shell: forever stopall
+  become: no
+
+
+- name: start load balancer
+  shell: forever start --watch --watchDirectory ./ site.js
+  become: no
+  args:
+    chdir: load_balancer/
+
+
+
+

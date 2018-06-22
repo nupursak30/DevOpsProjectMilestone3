@@ -1,0 +1,26 @@
+---
+
+- name: Unzipping the files needed to run iTrust on Jenkins
+  unarchive:
+    src: ./post_build.zip
+    dest: ./
+
+- name: Copy Github credentials template
+  copy:
+    src: ./credentials.ini
+    dest: ./post_build/credentials.ini
+
+- name: Copy ssh config
+  copy:
+    src: ./config
+    dest: ~/.ssh/config
+    mode: 0644
+  become: yes
+
+- name: Run the Ansible playbook to provision and configure checkbox 
+  shell: ansible-playbook -i inventory main.yml
+  args:
+   chdir: ./post_build
+  register: post_build_output
+- debug:
+    var: post_build_output.stdout

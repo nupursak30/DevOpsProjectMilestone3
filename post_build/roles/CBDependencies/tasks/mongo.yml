@@ -1,0 +1,19 @@
+---
+
+- name: Changing Environment variable Mongo_port
+  become: yes
+  lineinfile: dest=/etc/environment line='MONGO_PORT=3002' insertafter='EOF' state=present
+
+- name: Changing Environment variable Mongo_IP
+  become: yes
+  lineinfile: dest=/etc/environment line='MONGO_IP={{master}}' insertafter='EOF' state=present
+
+- name: Changing Environment variable Mongo_user
+  become: yes
+  lineinfile: dest=/etc/environment line='MONGO_USER="{{mongo_user}}"' insertafter='EOF' state=present
+
+- name: Changing Environment variable Mongo_pass
+  become: yes
+  lineinfile: dest=/etc/environment line='MONGO_PASSWORD="{{mongo_password}}"' insertafter='EOF' state=present
+
+

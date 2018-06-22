@@ -1,0 +1,3 @@
+---
+- import_tasks: redis.yml
+- import_tasks: canary.yml
